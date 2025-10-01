@@ -1,0 +1,34 @@
+import streamlit as st
+
+def main():
+    st.set_page_config(
+        page_title="Gestão de Consórcios",
+        page_icon="🚗",
+        layout="wide"
+    )
+
+    st.sidebar.title("Navegação")
+    pages = {
+        "Dashboard": "dashboard",
+        "Clientes": "clientes",
+        "Agenda": "agenda",
+        "Relatórios": "relatorios"
+    }
+    selection = st.sidebar.radio("Ir para", list(pages.keys()))
+
+    # Importa e executa a página selecionada
+    if selection == "Dashboard":
+        from pages.dashboard import dashboard
+        dashboard()
+    elif selection == "Clientes":
+        from pages.clientes import clientes
+        clientes()
+    elif selection == "Agenda":
+        from pages.agenda import agenda
+        agenda()
+    elif selection == "Relatórios":
+        from pages.relatorios import relatorios
+        relatorios()
+
+if __name__ == "__main__":
+    main()

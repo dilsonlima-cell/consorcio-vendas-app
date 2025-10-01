@@ -1,0 +1,27 @@
+import streamlit as st
+import pandas as pd
+import sqlite3
+from utils.database import get_db
+
+def dashboard():
+    st.title("📊 Dashboard de Vendas")
+
+    conn = get_db()
+    clientes_df = pd.read_sql_query("SELECT * FROM clientes", conn)
+    visitas_df = pd.read_sql_query("SELECT * FROM visitas", conn)
+    followups_df = pd.read_sql_query("SELECT * FROM followups WHERE status='pendente'", conn)
+    conn.close()
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.metric("Total de Visitas", len(visitas_df))
+    with col2:
+        interessados = len(clientes_df[clientes_df['status'] == 'Interessado'])
+        st.metric("Clientes Interessados", interessados)
+    with col3:
+        st.metric("Follow-ups Pendentes", len(followups_df))
+
+    st.subheader("Status dos Clientes")
+    status_counts = clientes_df['status'].value_counts()
+    st.bar_chart(status_counts)

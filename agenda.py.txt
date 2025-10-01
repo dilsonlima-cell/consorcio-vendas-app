@@ -1,0 +1,39 @@
+import streamlit as st
+import pandas as pd
+from datetime import datetime
+from utils.database import get_db
+
+def agenda():
+    st.title("📅 Agenda e Follow-ups")
+
+    with st.form("nova_visita"):
+        conn = get_db()
+        clientes = pd.read_sql_query("SELECT id, nome FROM clientes", conn)
+        conn.close()
+
+        cliente_nome = st.selectbox("Cliente", clientes['nome'])
+        cliente_id = int(clientes[clientes['nome'] == cliente_nome]['id'].iloc[0])
+        data_visita = st.date_input("Data da Visita", value=datetime.today())
+        observacao = st.text_area("Observação da Visita")
+        submitted = st.form_submit_button("Registrar Visita")
+
+        if submitted:
+            conn = get_db()
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO visitas (cliente_id, data_visita, observacao)
+                VALUES (?, ?, ?)
+            """, (cliente_id, str(data_visita), observacao))
+            conn.commit()
+            conn.close()
+            st.success("Visita registrada!")
+
+    st.subheader("Lembretes de Follow-up")
+    conn = get_db()
+    followups = pd.read_sql_query("""
+        SELECT f.id, c.nome, f.data_lembrete, f.status
+        FROM followups f
+        JOIN clientes c ON f.cliente_id = c.id
+    """, conn)
+    conn.close()
+    st.dataframe(followups)

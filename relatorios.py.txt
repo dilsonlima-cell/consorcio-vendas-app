@@ -1,0 +1,24 @@
+import streamlit as st
+import pandas as pd
+from utils.database import get_db
+
+def relatorios():
+    st.title("📈 Relatórios")
+
+    conn = get_db()
+    df = pd.read_sql_query("""
+        SELECT c.nome, c.contato, c.status, c.endereco, c.observacoes, c.data_registro
+        FROM clientes c
+        ORDER BY c.data_registro DESC
+    """, conn)
+    conn.close()
+
+    st.subheader("Lista de Clientes")
+    st.dataframe(df)
+
+    st.download_button(
+        label="Exportar para CSV",
+        data=df.to_csv(index=False).encode('utf-8'),
+        file_name="clientes.csv",
+        mime="text/csv"
+    )

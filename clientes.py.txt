@@ -1,0 +1,31 @@
+import streamlit as st
+import pandas as pd
+from utils.database import get_db
+
+def clientes():
+    st.title("👥 Gerenciar Clientes")
+
+    with st.form("novo_cliente"):
+        nome = st.text_input("Nome Completo")
+        contato = st.text_input("Contato (WhatsApp ou Email)")
+        status = st.selectbox("Status", ["Interessado", "Não Interessado", "Aguardando Retorno"])
+        endereco = st.text_input("Endereço (Bairro/Cidade)")
+        observacoes = st.text_area("Observações")
+        submitted = st.form_submit_button("Salvar Cliente")
+
+        if submitted:
+            conn = get_db()
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO clientes (nome, contato, status, endereco, observacoes)
+                VALUES (?, ?, ?, ?, ?)
+            """, (nome, contato, status, endereco, observacoes))
+            conn.commit()
+            conn.close()
+            st.success("Cliente salvo com sucesso!")
+
+    st.subheader("Clientes Cadastrados")
+    conn = get_db()
+    df = pd.read_sql_query("SELECT * FROM clientes ORDER BY data_registro DESC", conn)
+    conn.close()
+    st.dataframe(df)

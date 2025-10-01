@@ -1,0 +1,43 @@
+import sqlite3
+from pathlib import Path
+
+DB_PATH = Path("data/vendas.db")
+
+def init_db():
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS clientes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nome TEXT NOT NULL,
+            contato TEXT,
+            status TEXT,
+            endereco TEXT,
+            observacoes TEXT,
+            data_registro TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS visitas (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            cliente_id INTEGER,
+            data_visita TEXT,
+            observacao TEXT,
+            FOREIGN KEY (cliente_id) REFERENCES clientes (id)
+        )
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS followups (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            cliente_id INTEGER,
+            data_lembrete TEXT,
+            status TEXT DEFAULT 'pendente',
+            FOREIGN KEY (cliente_id) REFERENCES clientes (id)
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+def get_db():
+    conn = sqlite3.connect(DB_PATH)
+    return conn
